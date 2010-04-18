@@ -68,15 +68,10 @@ $(function() {
 
 	
 });
-/**
-*
-*  Javascript string pad
-*  http://www.webtoolkit.info/
-*
-**/
+
 
 function displayMarksLL() {
-	
+	// Step 1
 	// Latitudes and Longitudes
 	var out= [], marker, lat, lng, markers= $gmap.gMarkers;
 	for ( i in markers ) {
@@ -87,7 +82,8 @@ function displayMarksLL() {
 		out.push( marker.originalConfig.html.substr(0,1)+ " " + pad( lat.toString(), 7, "0") + "  "+  pad( lng.toString(), 8, "0") );
 	}
 	$("#markData").html( out.join("<br>") );
-	
+
+	// Step 2: 
 	// Range and bearings
 	var html="";
     for (var i = 0; i<markers.length; i++) {
@@ -99,20 +95,23 @@ function displayMarksLL() {
         if (i != j) {
           var d=markers[i].getPoint().distanceFrom(markers[j].getPoint())/1000*0.539956803;
 
-
           html += "<strong>"+markers[i].originalConfig.html.substr(0,1)+ "->"+markers[j].originalConfig.html.substr(0,1);
           html += "<\/strong> "+ d.toFixed(2) + " ";
           html += bearing( markers[i].getPoint(), markers[j].getPoint()) + "&deg; <br>";
-
         }
       }
       html += "</div>"
-
     }
 
 	$("#rbdata").html( html );	
 }
 
+/**
+*
+*  Javascript string pad
+*  http://www.webtoolkit.info/
+*
+**/
  
 var STR_PAD_LEFT = 1;
 var STR_PAD_RIGHT = 2;
@@ -142,32 +141,30 @@ function pad(str, len, pad, dir) {
 	return str;
 }
 
-     var degreesPerRadian = 180.0 / Math.PI;
-     var radiansPerDegree = Math.PI / 180.0;
+var degreesPerRadian = 180.0 / Math.PI;
+var radiansPerDegree = Math.PI / 180.0;
 
 
-     // Returns the bearing in degrees between two points.
-     // North = 0, East = 90, South = 180, West = 270.
-     function bearing( from, to ) {
-       // See T. Vincenty, Survey Review, 23, No 176, p 88-93,1975.
-       // Convert to radians.
-       var lat1 = from.latRadians();
-       var lon1 = from.lngRadians();
-       var lat2 = to.latRadians();
-       var lon2 = to.lngRadians();
+// Returns the bearing in degrees between two points.
+// North = 0, East = 90, South = 180, West = 270.
+function bearing( from, to ) {
+  // See T. Vincenty, Survey Review, 23, No 176, p 88-93,1975.
+  // Convert to radians.
+  var lat1 = from.latRadians();
+  var lon1 = from.lngRadians();
+  var lat2 = to.latRadians();
+  var lon2 = to.lngRadians();
 
-       // Compute the angle.
-       var angle = - Math.atan2( Math.sin( lon1 - lon2 ) * Math.cos( lat2 ), Math.cos( lat1 ) * Math.sin( lat2 ) - Math.sin( lat1 ) * Math.cos( lat2 ) * Math.cos( lon1 - lon2 ) );
-       if ( angle < 0.0 )
-	angle  += Math.PI * 2.0;
+  // Compute the angle.
+  var angle = - Math.atan2( Math.sin( lon1 - lon2 ) * Math.cos( lat2 ), Math.cos( lat1 ) * Math.sin( lat2 ) - Math.sin( lat1 ) * Math.cos( lat2 ) * Math.cos( lon1 - lon2 ) );
+  if ( angle < 0.0 ) { angle  += Math.PI * 2.0; }
 
-       // And convert result to degrees.
-       angle = angle * degreesPerRadian;
-       angle = angle.toFixed(0);
+  // And convert result to degrees.
+  angle = angle * degreesPerRadian;
+  angle = angle.toFixed(0);
 
-       return angle;
-     }
-      
+  return angle;
+}      
 
 </script>
 </body>
