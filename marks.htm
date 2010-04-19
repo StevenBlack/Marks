@@ -119,7 +119,7 @@ function displayMarksLL() {
 
           html += "<strong>"+markers[i].originalConfig.html.substr(0,1)+ "->"+markers[j].originalConfig.html.substr(0,1);
           html += "<\/strong> "+ d.toFixed(2) + " ";
-          html += bearing( markers[i].getPoint(), markers[j].getPoint()) + "&deg; <br>";
+          html += bearing( markers[i].getPoint(), markers[j].getPoint()) + "&deg;<br>";
         }
       }
       html += "</div>"

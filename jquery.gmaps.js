@@ -32,14 +32,17 @@
 			// Create new map and set initial options
 			$gmap = new GMap2( this );
 			
+			// Attach the maps settings to the map itself
+			$gmap.settings= settings;
+			
 			// Our array of markers for this map
 			$gmap.gMarkers= [];
+			
 			// Our array of maps
 			$.fn.gMap.gMaps.push( $gmap );
-			gmarkers= $gmap.gMarkers;
 			
 			// Try to center to the first marker
-			if (!settings.latitude && !settings.longitude)
+			if ( !settings.latitude && !settings.longitude )
 			{
 				// Check for at least one marker
 				if ( $.isArray( settings.markers) && settings.markers.length >= 1)
@@ -83,61 +86,71 @@
 			// Add all map markers
 			for ( var j = 0; j < settings.markers.length; j++ )
 			{
-				// Get the options from current marker
-				marker = settings.markers[j];
-				
-				// Create new icon
-				gicon = new GIcon();
-				
-				// Set icon properties from global options
-				gicon.image = settings.icon.image;
-				gicon.shadow = settings.icon.shadow;
-				gicon.iconSize = ( $.isArray( settings.icon.iconsize) ) ? new GSize( settings.icon.iconsize[ 0 ], settings.icon.iconsize[ 1 ] ) : settings.icon.iconsize;
-				gicon.shadowSize = ( $.isArray( settings.icon.shadowsize ) ) ? new GSize( settings.icon.shadowsize[ 0 ], settings.icon.shadowsize[ 1 ] ) : settings.icon.shadowsize;
-				gicon.iconAnchor = ( $.isArray( settings.icon.iconanchor ) ) ? new GPoint( settings.icon.iconanchor[ 0 ], settings.icon.iconanchor[ 1 ] ) : settings.icon.iconanchor;
-				gicon.infoWindowAnchor = ( $.isArray( settings.icon.infowindowanchor ) ) ? new GPoint( settings.icon.infowindowanchor[ 0 ], settings.icon.infowindowanchor[ 1 ] ) : settings.icon.infowindowanchor;
-				
-				if (marker.icon)
-				{
-					// Overwrite global options with ther marker one's
-					gicon.image = marker.icon.image;
-					if ( marker.icon.shadow ) { gicon.shadow = marker.icon.shadow; }
-					if ( marker.icon.iconsize ) { gicon.iconSize = ( $.isArray( marker.icon.iconsize ) ) ? new GSize( marker.icon.iconsize[ 0 ], marker.icon.iconsize[ 1 ]) : marker.icon.iconsize; }
-					if ( marker.icon.shadowsize ) { gicon.shadowSize = ( $.isArray( marker.icon.shadowsize ) ) ? new GSize( marker.icon.shadowsize[ 0 ], marker.icon.shadowsize[ 1 ]) : marker.icon.shadowsize; }
-					if ( marker.icon.iconanchor ) { gicon.iconAnchor = ( $.isArray( marker.icon.iconanchor ) ) ? new GPoint( marker.icon.iconanchor[ 0 ], marker.icon.iconanchor[ 1 ]) : marker.icon.iconanchor; }
-					if ( marker.icon.infowindowanchor ) { gicon.infoWindowAnchor = ( $.isArray( marker.icon.infowindowanchor ) ) ? new GPoint( marker.icon.infowindowanchor[ 0 ], marker.icon.infowindowanchor[ 1 ] ) : marker.icon.infowindowanchor; }
-				}
-							
-				var gmarkerOptions= { icon: gicon };
-				if ( marker.draggable ) { $.extend( gmarkerOptions, { draggable : true  } ); }	
-				
-				// Create a new marker on the map
-				gmarker = new GMarker( new GPoint( marker.longitude, marker.latitude), gmarkerOptions );
-				
-				// save the marker's configuration data
-				gmarker.originalConfig= marker;
-				
-				// sb
-				gmarkers.push( gmarker );
-				
-				// Only display info window if the marker contains a description
-				if ( marker.html )
-				{
-					// Bind the info window to marker
-					gmarker.bindInfoWindowHtml(settings.html_prepend + marker.html + settings.html_append);
-					// Add overlay if marker was created and check if popup should be shown when map is loaded
-					if ( gmarker ) { $gmap.addOverlay(gmarker); }
-					if ( marker.popup === true ) { gmarker.openInfoWindowHtml( settings.html_prepend + marker.html + settings.html_append ); }
-				} else
-				{
-					// Add overlay marker
-					if (gmarker) { $gmap.addOverlay( gmarker ); }
-				}
+				$.fn.gMap.addMarker( settings.markers[j], $gmap )
 			}
 		});
 		
 	};
 		
+	// Add marker
+	$.fn.gMap.addMarker = function( marker, $gmap ) {
+
+		var gmarkers= $gmap.gMarkers,
+		  settings= $gmap.settings,
+		  settingsIcon= settings.icon,
+		  markerIcon= marker.icon,
+		  // Create new icon
+		  gicon = new GIcon();
+
+		// Set icon properties from the map's global settings
+		gicon.image = settingsIcon.image;
+		gicon.shadow = settingsIcon.shadow;
+		gicon.iconSize = ( $.isArray( settingsIcon.iconsize) ) ? new GSize( settingsIcon.iconsize[ 0 ], settingsIcon.iconsize[ 1 ] ) : settingsIcon.iconsize;
+		gicon.shadowSize = ( $.isArray( settingsIcon.shadowsize ) ) ? new GSize( settingsIcon.shadowsize[ 0 ], settingsIcon.shadowsize[ 1 ] ) : settingsIcon.shadowsize;
+		gicon.iconAnchor = ( $.isArray( settingsIcon.iconanchor ) ) ? new GPoint( settingsIcon.iconanchor[ 0 ], settingsIcon.iconanchor[ 1 ] ) : settingsIcon.iconanchor;
+		gicon.infoWindowAnchor = ( $.isArray( settingsIcon.infowindowanchor ) ) ? new GPoint( settingsIcon.infowindowanchor[ 0 ], settingsIcon.infowindowanchor[ 1 ] ) : settingsIcon.infowindowanchor;
+
+		if (markerIcon)
+		{
+			// Overwrite global options with ther marker one's
+			gicon.image = markerIcon.image;
+			if ( markerIcon.shadow ) { gicon.shadow = markerIcon.shadow; }
+			if ( markerIcon.iconsize ) { gicon.iconSize = ( $.isArray( markerIcon.iconsize ) ) ? new GSize( markerIcon.iconsize[ 0 ], markerIcon.iconsize[ 1 ]) : markerIcon.iconsize; }
+			if ( markerIcon.shadowsize ) { gicon.shadowSize = ( $.isArray( markerIcon.shadowsize ) ) ? new GSize( markerIcon.shadowsize[ 0 ], markerIcon.shadowsize[ 1 ]) : markerIcon.shadowsize; }
+			if ( markerIcon.iconanchor ) { gicon.iconAnchor = ( $.isArray( markerIcon.iconanchor ) ) ? new GPoint( markerIcon.iconanchor[ 0 ], markerIcon.iconanchor[ 1 ]) : markerIcon.iconanchor; }
+			if ( markerIcon.infowindowanchor ) { gicon.infoWindowAnchor = ( $.isArray( markerIcon.infowindowanchor ) ) ? new GPoint( markerIcon.infowindowanchor[ 0 ], markerIcon.infowindowanchor[ 1 ] ) : markerIcon.infowindowanchor; }
+		}
+
+		var gmarkerOptions= { icon: gicon };
+		if ( marker.draggable ) { $.extend( gmarkerOptions, { draggable : true  } ); }	
+
+		// Create a new marker on the map
+		gmarker = new GMarker( new GPoint( marker.longitude, marker.latitude), gmarkerOptions );
+
+		// save the marker's configuration data
+		gmarker.originalConfig= marker;
+
+		// sb
+		gmarkers.push( gmarker );
+
+		// Only display info window if the marker contains a description
+		if ( marker.html )
+		{
+			// Bind the info window to marker
+			gmarker.bindInfoWindowHtml(settings.html_prepend + marker.html + settings.html_append);
+			// Add overlay if marker was created and check if popup should be shown when map is loaded
+			if ( gmarker ) { $gmap.addOverlay(gmarker); }
+			if ( marker.popup === true ) { gmarker.openInfoWindowHtml( settings.html_prepend + marker.html + settings.html_append ); }
+		} else
+		{
+			// Add overlay marker
+			if (gmarker) { $gmap.addOverlay( gmarker ); }
+		}
+	//--	  
+	  
+	  
+	};
+			
 	// Set default settings
 	$.fn.gMap.defaults =
 	{
