@@ -92,6 +92,7 @@
 		
 	};
 		
+	
 	// Add marker
 	$.fn.gMap.addMarker = function( marker, $gmap ) {
 
@@ -126,12 +127,15 @@
 
 		// Create a new marker on the map
 		gmarker = new GMarker( new GPoint( marker.longitude, marker.latitude), gmarkerOptions );
+		
+  	if ( marker.draggable ) {
+  		GEvent.addListener( gmarker, "dragend",  function() { $( document ).trigger( { type: "markerChange"} ); } );
+  	}
 
 		// save the marker's configuration data
 		gmarker.originalConfig= marker;
 
-		// sb
-		gmarkers.push( gmarker );
+		this.addToMarkerCollection( gmarker, $gmap );
 
 		// Only display info window if the marker contains a description
 		if ( marker.html )
@@ -150,6 +154,11 @@
 	  
 	  
 	};
+
+	$.fn.gMap.addToMarkerCollection = function( marker, map ) {
+		map.gMarkers.push( marker );
+	};
+
 			
 	// Set default settings
 	$.fn.gMap.defaults =
@@ -181,3 +190,6 @@
 	$.fn.gMap.gMaps.gMarkers = [];	
 	
 })(jQuery);
+
+
+
