@@ -19,18 +19,18 @@
 	$.fn.gMap = function(options)
 	{
 		// Check if the browser is compatible with Google Maps
-		if (!window.GBrowserIsCompatible || !GBrowserIsCompatible()) { return this };
+		if ( !window.GBrowserIsCompatible || !GBrowserIsCompatible() ) { return this };
 		
 		// Build main options before element iteration
-		var opts = $.extend({}, $.fn.gMap.defaults, options);
+		var opts = $.extend( {}, $.fn.gMap.defaults, options );
     
 		var gmarkers= $.fn.gMap.gMarkers;
 		
 		// Iterate each matched element
-		return this.each(function()
+		return this.each( function()
 		{
 			// Create new map and set initial options
-			$gmap = new GMap2(this);
+			$gmap = new GMap2( this );
 			
 			// Our array of markers for this map
 			$gmap.gMarkers= [];
@@ -109,10 +109,10 @@
 				}
 							
 				var gmarkerOptions= { icon: gicon };
-				if ( marker.draggable ) { $.extend( gmarkerOptions, {draggable : true } ); }	
+				if ( marker.draggable ) { $.extend( gmarkerOptions, { draggable : true  } ); }	
 				
 				// Create a new marker on the map
-				gmarker = new GMarker(new GPoint(marker.longitude, marker.latitude), gmarkerOptions );
+				gmarker = new GMarker( new GPoint( marker.longitude, marker.latitude), gmarkerOptions );
 				
 				// save the marker's configuration data
 				gmarker.originalConfig= marker;
@@ -121,25 +121,19 @@
 				gmarkers.push( gmarker );
 				
 				// Only display info window if the marker contains a description
-				if (marker.html)
+				if ( marker.html )
 				{
 					// Bind the info window to marker
 					gmarker.bindInfoWindowHtml(opts.html_prepend + marker.html + opts.html_append);
-					
 					// Add overlay if marker was created and check if popup should be shown when map is loaded
-					if (gmarker) { $gmap.addOverlay(gmarker); }
-					if (marker.popup === true) { gmarker.openInfoWindowHtml(opts.html_prepend + marker.html + opts.html_append); }
-					
-				}
-				else
+					if ( gmarker ) { $gmap.addOverlay(gmarker); }
+					if ( marker.popup === true ) { gmarker.openInfoWindowHtml( opts.html_prepend + marker.html + opts.html_append ); }
+				} else
 				{
 					// Add overlay marker
 					if (gmarker) { $gmap.addOverlay(gmarker); }
-					
 				}
-				
 			}
-			
 		});
 		
 	};
@@ -147,31 +141,30 @@
 	// Set default settings
 	$.fn.gMap.defaults =
 	{
-		latitude:				0,
-		longitude:				0,
+		latitude:			44.220,
+		longitude:		-76.500,
 		zoom:					6,
-		markers:				[],
-		controls:				[],
-		scrollwheel:			true,
-		maptype:				G_NORMAL_MAP,
-		html_prepend:			'<div class="gmap_marker">',
-		html_append:			'</div>',
+		markers:			[],
+		controls:			[],
+		scrollwheel:	true,
+		maptype:			G_NORMAL_MAP,
+		html_prepend:	'<div class="gmap_marker">',
+		html_append:	'</div>',
 		icon:
-		{
-			image:				"http://www.google.com/mapfiles/marker.png",
-			shadow:				"http://www.google.com/mapfiles/shadow50.png",
-			iconsize:			[20, 34],
-			shadowsize:			[37, 34],
-			iconanchor:			[9, 34],
-			infowindowanchor:	[9, 2]
-			
-		}
-		
+  		{
+  			image:				"http://www.google.com/mapfiles/marker.png",
+  			shadow:				"http://www.google.com/mapfiles/shadow50.png",
+  			iconsize:			[20, 34],
+  			shadowsize:		[37, 34],
+  			iconanchor:		[9, 34],
+  			infowindowanchor:	[9, 2]
+  		},
+  	draggable: false
 	};
 
 	// Array of maps
 	$.fn.gMap.gMaps = [];
+	// Each has an array of markers
 	$.fn.gMap.gMaps.gMarkers = [];	
-	$.fn.gMap.gMarkers = [];
 	
 })(jQuery);
