@@ -10,12 +10,16 @@
 .rb {width:150px; float:left;padding-left:1em; padding-bottom: 2em; font-family:courier;}
 #toggleGhosts { display: none;}
 .lOffset { margin-left: 1em; }
+.bOffset { margin-bottom: 0.5em; }
 #version { float:right; width:450px; padding:1em; right:0; position:absolute;}
+#addRC, #addMark { display:none; }
+#importExport { display:none; margin-top:1em; margin-bottom:1em; border:1px solid #aaa;}
+#appData { height:400px; width:90%}
 </style>
 </head>
 <body>
 <div id="version">
-Version: <strong>2010-04-19 16:00</strong> - <strong>To do:</strong> persistance.
+Version: <strong>2010-04-20 15:00</strong> - <strong>To do:</strong> persistance.
 </div>
 
 <h3>KYC Marks</h3>
@@ -23,17 +27,25 @@ Version: <strong>2010-04-19 16:00</strong> - <strong>To do:</strong> persistance
 <span>Mouse Lat/Lon: <input id="mouse" type="text"> 
 <a id="toggleGrids" class="lOffset" href="#">Grid (Dec)</a> 
 <span class="lOffset">Bearings: <span id="bearing">True</span> <a id="toggleBearings"  href="#">switch</a></span>
-<a id="toggleGhosts" class="lOffset" href="#">Hide ghosts</a>
 <a id="addRC" class="lOffset" href="#">Add RC</a>
 <a id="addMark" class="lOffset" href="#">Add Mark</a>
+<a id="dataToggle" class="lOffset" href="#">Data</a>
+<a id="toggleGhosts" class="lOffset" href="#">Hide ghosts</a>
 </span>
 <div style="clear:both"></div>
+<div id="importExport">
+	<div id="dataControls">
+		<a href="#" id="hideData" class="lOffset bOffset">[ Hide ]</a>
+	</div>
+	<textarea id="appData"></textarea>
+</div>
 <div id="map"></div>
 <div id="markData"></div>
 <div style="clear:both"></div>
 <div id="rbdata"></div>
+<div style="clear:both"></div>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js" type="text/javascript"></script>
+<script src="jquery-1.4.2.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 /*
 var gmKeys= {
@@ -45,16 +57,19 @@ var gmKeys= {
 */	
 </script>
 
-
-
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1p3H4HjgFRGggryYDUwteBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxRKJ9lPafzRFCzaRsPQSUSKAe2tww" type="text/javascript"></script>
 <script src="jquery.gmaps.js" type="text/javascript"></script>
-<script src="kycMarks.js" type="text/javascript"></script>
+
 <script src="LatLonGraticules.js" type="text/javascript"></script>
+<script src="BdccArrowedPolyline.js" type="text/javascript"></script>
+
+<script src="kycMarks.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 
-// overriding the default behaviour which is a .push()
+// $("#markdata").html( markerData() )
+
+// overriding the default behaviour which is a .push() without sorting
 var oldAddToMarkerCollection= $.fn.gMap.addToMarkerCollection;
 
 $.fn.gMap.addToMarkerCollection = function( marker, map ) {
@@ -63,40 +78,31 @@ $.fn.gMap.addToMarkerCollection = function( marker, map ) {
 	map.gMarkers.sort( markerSort );
 };
 
+var kycDefaults = { 
+	scrollwheel: false,		
+	zoom: 13,
+	latitude: 44.2044,
+	longitude: -76.4949,
+	draggable: false 
+};
 
-
-var rcBoats=  [ 
-	{ latitude: 44.2230, longitude: -76.485, html: "1", icon : { image : "icons/others/marker-ORANGE-1.png"}, draggable: true } ,
-	{ latitude: 44.2230, longitude: -76.485, html: "2", icon : { image : "icons/others/marker-ORANGE-2.png"}, draggable: true } ,
-	{ latitude: 44.2230, longitude: -76.485, html: "3", icon : { image : "icons/others/marker-ORANGE-3.png"}, draggable: true } ,
-	{ latitude: 44.2230, longitude: -76.485, html: "4", icon : { image : "icons/others/marker-ORANGE-4.png"}, draggable: true } ,
-	{ latitude: 44.2230, longitude: -76.485, html: "5", icon : { image : "icons/others/marker-ORANGE-5.png"}, draggable: true } 		
-];
-
-var newMarks=  [ 
-	{ latitude: 44.2160, longitude: -76.45, html: "A", icon : { image : "icons/others/marker-YELLOW-A.png"}, draggable: true } ,
-	{ latitude: 44.2160, longitude: -76.45, html: "T", icon : { image : "icons/others/marker-YELLOW-T.png"}, draggable: true } ,
-	{ latitude: 44.2160, longitude: -76.45, html: "U", icon : { image : "icons/others/marker-YELLOW-U.png"}, draggable: true } ,
-	{ latitude: 44.2160, longitude: -76.45, html: "W", icon : { image : "icons/others/marker-YELLOW-W.png"}, draggable: true } 
-];
 
 $(function() {
-	var myDefaults = { 
-		scrollwheel: false,		
-		zoom: 13,
-		latitude: 44.2044,
-		longitude: -76.4949,
-		draggable: false };
 
-	var options= $.extend( {}, myDefaults, kycMarks );
+	var options= $.extend( {}, kycDefaults, kycMarks );
 	
 	$("#map").gMap( options );
 
-
-
 	$gmap.declination= 13;  // positive is declination west
 	$gmap.bearings="true";
-	
+
+  if ( rcBoats.length ) {
+  	$("#addRC").show();
+  }
+  if ( newMarks.length ) {
+  	$("#addMark").show();
+  }  
+
 	
 	$gmap.userBearing = function( degrees ) {
 		var deg= (+degrees);
@@ -116,22 +122,20 @@ $(function() {
 		}
 		return deg; 
 	}
-
-
 	
 	////Mouse pointer movement updates the LL indicator
 	GEvent.addListener($gmap, "mousemove", function(point) {
 		document.getElementById("mouse").value= point.toUrlValue();
 	}); 
 	
-
 	var markers= $gmap.gMarkers;
 /*
 	$( markers ).each( function() {
 		GEvent.addListener( this, "dragend",  dragEnd );
 	})	
 */	
-	$(document).bind( "markerChange", dragEnd )
+
+	$( document ).bind( "markerChange", dragEnd )
 	
 	displayMarksLL();
 	
@@ -182,6 +186,7 @@ $(function() {
 	$("#addRC").click( function() {
 		var spec= rcBoats.shift();
 		$.fn.gMap.addMarker( spec, $gmap );
+		displayMarksLL();				
 		if (!rcBoats.length ) { $(this).hide()};
 	});
 
@@ -189,14 +194,30 @@ $(function() {
 	$("#addMark").click( function() {
 		var spec= newMarks.shift();
 		$.fn.gMap.addMarker( spec, $gmap );
+		displayMarksLL();				
 		if (!newMarks.length ) { $(this).hide()};
 	});	
+	
+	// flop data view
+	$("#dataToggle").toggle(
+		function() { 
+			$("#appData").val( markerData() );
+			$("#importExport").slideDown();
+		},
+		function() {$("#importExport").slideUp();}		
+	);
+	
+	$("#hideData").click(
+		function() {
+			$("#importExport").slideUp();
+		}
+	);
 
 });
 
 
 
-function dragEnd() {
+function dragEnd(e) {
 	displayMarksLL();
 	$("#toggleGhosts").show();
 }
@@ -309,12 +330,88 @@ function bearing( from, to ) {
   return angle;
 }      
 
-function	markerSort( a , b ) {
+function markerSort( a , b ) {
 		if ( !a || !b ) { return 0; }
 		return a.originalConfig.html > b.originalConfig.html ? 1 : 0;
 };
 
 
+function markerData(  ) { 
+	var marks= $gmap.gMarkers, len= marks.length, retData=[], packageData=[];
+	
+	// first, the existing pins on the map
+	for ( var i= 0; i < len; i++ )	{
+		retData.push( markerSerialize( marks[i] ) );
+	}
+	packageData.push( "kycMarks= { markers: [ \n"+ retData.join(", \n") + " ]};" );
+	
+	// next, the RC boats to add
+	len= rcBoats.length, retData=[]
+	for ( var i= 0; i < len; i++ )	{
+		retData.push( markerSerialize( rcBoats[i] ) );
+	}
+	packageData.push( "rcBoats= [ \n"+ retData.join(", \n") + " ];" );
+
+	// next, the remaining marks to add
+	len= newMarks.length, retData=[]
+	for ( var i= 0; i < len; i++ )	{
+		retData.push( markerSerialize( newMarks[i] ) );
+	}
+	packageData.push( "newMarks= [ \n"+ retData.join(", \n") + " ];" );
+	
+	return packageData.join("\n \n")
+	
+}	
+
+function markerSerialize( marker ) { 
+	var out=[];
+	if (  marker.getLatLng ) {
+		var ll= marker.getLatLng();
+		out.push("latitude : "+ ll.y );
+		out.push("longitude : "+ ll.x );
+		out.push('html : "'+ marker.originalConfig.html+'"' );
+		out.push('icon : { image : "'+ marker.originalConfig.icon.image + '"}');
+		if (marker.originalConfig.ghost) {
+			out.push('ghost : true');
+		}
+		if (marker.originalConfig.draggable) {
+			out.push('draggable : true');
+		}
+	} else   // we have raw data
+	{
+		out.push("latitude : "+ marker.latitude );
+		out.push("longitude : "+ marker.longitude );
+		out.push('html : "'+ marker.html+'"' );
+		out.push('icon : { image : "'+ marker.icon.image + '"}');
+		if (marker.draggable) {
+			out.push('draggable : true');
+		}		
+	}
+	return "{ "+ out.join(", ") + " }"
+}
+
+function addWind( iMarker, bearing, plength) {
+	if ( typeof bearing==="undefined") {
+		return removeWind( iMarker );
+	}
+	length = ( plength || 2 ) * 1852;  // meters per Nm
+	var RC= $gmap.gMarkers[ iMarker ].getLatLng(), 
+		ff= Course(RC, length, bearing- ( $gmap.bearings=== "magnetic" ? $gmap.declination : 0 ) ),
+		poly1= new BDCCArrowedPolyline( [ff, RC],"#FF0000",4,0.3,null,30,7,"#0000FF",2,0.5);
+		$gmap.addOverlay( poly1 );	
+		$gmap.gMarkers[ iMarker ].poly.push( poly1 );
+}
+
+function removeWind( iMarker ) {
+	var markers= $gmap.gMarkers;
+	if ( markers[ iMarker ] && markers[ iMarker ].poly && markers[ iMarker ].poly.length ) {
+		var num= markers[ iMarker ].poly.length;
+		for ( var i= 0; i < num; i++ ) {
+			markers[ iMarker ].poly[0].remove();  // removes the marker
+			markers[ iMarker ].poly.shift();			// removes the reference to the marker
+		}
+	}
+}
 </script>
 </body>
 </html>

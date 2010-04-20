@@ -38,6 +38,7 @@
 			// Our array of markers for this map
 			$gmap.gMarkers= [];
 			
+			
 			// Our array of maps
 			$.fn.gMap.gMaps.push( $gmap );
 			
@@ -127,6 +128,9 @@
 
 		// Create a new marker on the map
 		gmarker = new GMarker( new GPoint( marker.longitude, marker.latitude), gmarkerOptions );
+
+		// A polyline/shape holder
+		gmarker.poly= [];
 		
   	if ( marker.draggable ) {
   		GEvent.addListener( gmarker, "dragend",  function() { $( document ).trigger( { type: "markerChange"} ); } );
@@ -191,5 +195,12 @@
 	
 })(jQuery);
 
-
+function Course( point, dist, bearing) {
+	// dist in m
+	var latConv = point.distanceFrom( new GLatLng( point.lat()+0.1, point.lng()))*10;
+ 	var lngConv = point.distanceFrom (new GLatLng( point.lat(), point.lng()+0.1))*10;
+ 	var lat=dist * Math.cos(bearing * Math.PI/180)/latConv;
+ 	var lng=dist * Math.sin(bearing * Math.PI/180)/lngConv; 
+ 	return new GLatLng(point.lat()+lat,point.lng()+lng)      
+}
 
