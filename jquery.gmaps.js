@@ -137,8 +137,8 @@
 
 		this.addToMarkerCollection( gmarker, $gmap );
 
-		// Only display info window if the marker contains a description
-		if ( marker.html )
+		// Only display info window if the marker contains a description AND if we're enabled.
+		if ( marker.html && marker.infoWindowEnabled )
 		{
 			// Bind the info window to marker
 			gmarker.bindInfoWindowHtml(settings.html_prepend + marker.html + settings.html_append);
