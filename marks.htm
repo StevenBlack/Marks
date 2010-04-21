@@ -15,11 +15,14 @@
 #addRC, #addMark { display:none; }
 #importExport { display:none; margin-top:1em; margin-bottom:1em; border:1px solid #aaa;}
 #appData { height:400px; width:90%}
+#wind { background-color:#bbb; padding:5px;}
+#direction {width:40px;}
+#windMark {width:20px;}
 </style>
 </head>
 <body>
 <div id="version">
-Version: <strong>2010-04-20 15:00</strong> - <strong>To do:</strong> persistance.
+Version: <strong>2010-04-20 17:30</strong> 
 </div>
 
 <h3>KYC Marks</h3>
@@ -30,12 +33,15 @@ Version: <strong>2010-04-20 15:00</strong> - <strong>To do:</strong> persistance
 <a id="addRC" class="lOffset" href="#">Add RC</a>
 <a id="addMark" class="lOffset" href="#">Add Mark</a>
 <a id="dataToggle" class="lOffset" href="#">Data</a>
+<span id="wind" class="lOffset">
+	Wind: <input type="text" id="direction"> on <input type="text" id="windMark"> <a href="#" id="applyWind">apply</a>
+</span>
 <a id="toggleGhosts" class="lOffset" href="#">Hide ghosts</a>
 </span>
 <div style="clear:both"></div>
 <div id="importExport">
 	<div id="dataControls">
-		<a href="#" id="hideData" class="lOffset bOffset">[ Hide ]</a>
+		<a href="#" id="hideData" class="lOffset bOffset">[ Hide ]</a> 		<a href="#" id="loadData" class="lOffset bOffset">[ Load this data ]</a>
 	</div>
 	<textarea id="appData"></textarea>
 </div>
@@ -87,8 +93,7 @@ var kycDefaults = {
 };
 
 
-$(function() {
-
+function loadMap( kycMarks ) {
 	var options= $.extend( {}, kycDefaults, kycMarks );
 	
 	$("#map").gMap( options );
@@ -102,8 +107,7 @@ $(function() {
   if ( newMarks.length ) {
   	$("#addMark").show();
   }  
-
-	
+  
 	$gmap.userBearing = function( degrees ) {
 		var deg= (+degrees);
 		if (this.bearings.toLowerCase()=== "magnetic") {  
@@ -127,17 +131,20 @@ $(function() {
 	GEvent.addListener($gmap, "mousemove", function(point) {
 		document.getElementById("mouse").value= point.toUrlValue();
 	}); 
+
 	
 	var markers= $gmap.gMarkers;
-/*
-	$( markers ).each( function() {
-		GEvent.addListener( this, "dragend",  dragEnd );
-	})	
-*/	
 
 	$( document ).bind( "markerChange", dragEnd )
 	
 	displayMarksLL();
+	  
+} ;
+
+$(function() {
+
+  loadMap( kycMarks );
+
 	
 	// Show/hide ghosts
 	$("#toggleGhosts").toggle(
@@ -188,6 +195,7 @@ $(function() {
 		$.fn.gMap.addMarker( spec, $gmap );
 		displayMarksLL();				
 		if (!rcBoats.length ) { $(this).hide()};
+		return false;
 	});
 
 	// New Marks
@@ -196,31 +204,62 @@ $(function() {
 		$.fn.gMap.addMarker( spec, $gmap );
 		displayMarksLL();				
 		if (!newMarks.length ) { $(this).hide()};
+		return false;		
 	});	
 	
 	// flop data view
-	$("#dataToggle").toggle(
-		function() { 
+	$("#dataToggle").click( function() {
+		if ( $("#importExport").is(":visible") ) {
+			$("#importExport").slideUp();		
+		} else {
 			$("#appData").val( markerData() );
 			$("#importExport").slideDown();
-		},
-		function() {$("#importExport").slideUp();}		
-	);
+		}
+		return false;		
+	});
 	
-	$("#hideData").click(
-		function() {
-			$("#importExport").slideUp();
+	$("#hideData").click( function() {
+		$("#importExport").slideUp();
+		return false;			
 		}
 	);
+	
+	$("#loadData").click( function() {
+		var dat= $("#appData").val();
+		$("#importExport").slideUp();			
+		eval( dat );
+    loadMap( kycMarks );			
+		return false;
+		}
+	);	
+	
+	$("#applyWind").click( function(){
+		addWind();
+		var direction= $("#direction").val(), mrk= $("#windMark").val();
+		direction= (+direction);
+		
+		addWind( findMarkIndexFromLabel( mrk ), direction  );
+		$("#direction").val("");
+		$("#windMark").val("");
+		return false;
+	});
 
 });
 
-
+function findMarkIndexFromLabel( label ) {
+	var lbl = label.toUpperCase(), len= $gmap.gMarkers.length;
+	for ( var i= 0; i < len; i++ ) {
+		if ( ! $gmap.gMarkers[i].originalConfig.ghost && $gmap.gMarkers[i].originalConfig.html.substring(0,1)=== lbl) {
+			return i;
+		}
+	}
+	return null;
+}
 
 function dragEnd(e) {
 	displayMarksLL();
 	$("#toggleGhosts").show();
-}
+};
 
 function ghosts( show ) {
 	$( $gmap.gMarkers ).each( function() {
@@ -228,7 +267,7 @@ function ghosts( show ) {
 			if ( show ) { this.show(); } else { this.hide(); }
 		}
 	});
-}
+};
 
 function displayMarksLL() {
 	// Step 1
@@ -268,7 +307,7 @@ function displayMarksLL() {
     }
 
 	$( "#rbdata" ).html( html );	
-}
+};
 
 /**
 *
@@ -303,7 +342,7 @@ function pad(str, len, pad, dir) {
 		} // switch
 	}
 	return str;
-}
+};
 
 var degreesPerRadian = 180.0 / Math.PI;
 var radiansPerDegree = Math.PI / 180.0;
@@ -328,7 +367,7 @@ function bearing( from, to ) {
   angle = angle.toFixed(0);
 
   return angle;
-}      
+};
 
 function markerSort( a , b ) {
 		if ( !a || !b ) { return 0; }
@@ -361,7 +400,7 @@ function markerData(  ) {
 	
 	return packageData.join("\n \n")
 	
-}	
+};
 
 function markerSerialize( marker ) { 
 	var out=[];
@@ -388,9 +427,16 @@ function markerSerialize( marker ) {
 		}		
 	}
 	return "{ "+ out.join(", ") + " }"
-}
+};
 
 function addWind( iMarker, bearing, plength) {
+	if ( typeof iMarker==="undefined") {	
+		var len= $gmap.gMarkers.length;
+		for ( var i= 0; i< len; i++ ) {
+			removeWind(i);
+		}
+		return;
+	}
 	if ( typeof bearing==="undefined") {
 		return removeWind( iMarker );
 	}
@@ -400,7 +446,7 @@ function addWind( iMarker, bearing, plength) {
 		poly1= new BDCCArrowedPolyline( [ff, RC],"#FF0000",4,0.3,null,30,7,"#0000FF",2,0.5);
 		$gmap.addOverlay( poly1 );	
 		$gmap.gMarkers[ iMarker ].poly.push( poly1 );
-}
+	};
 
 function removeWind( iMarker ) {
 	var markers= $gmap.gMarkers;
