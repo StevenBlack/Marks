@@ -8,16 +8,16 @@
 #map, #markData { float:left; }
 #mouse {font-weight: bold;}
 .rb {width:150px; float:left;padding-left:1em; padding-bottom: 2em; font-family:courier;}
-#toggleGhosts { display: none;}
+#toggleGhosts { }
 .lOffset { margin-left: 1em; }
 .bOffset { margin-bottom: 0.5em; }
 #version { float:right; width:450px; padding:1em; right:0; position:absolute;}
 #addRC, #addMark { display:none; }
 #importExport { display:none; margin-top:1em; margin-bottom:1em; border:1px solid #aaa;}
 #appData { height:400px; width:90%}
-#wind { background-color:#bbb; padding:5px;}
+#wind, #range { background-color:#bbb; padding:5px;}
 #direction {width:40px;}
-#windMark {width:20px;}
+#windMark, #ringMark {width:20px;}
 </style>
 </head>
 <body>
@@ -35,6 +35,9 @@ Version: <strong>2010-04-20 17:30</strong>
 <a id="dataToggle" class="lOffset" href="#">Data</a>
 <span id="wind" class="lOffset">
 	Wind: <input type="text" id="direction"> on <input type="text" id="windMark"> <a href="#" id="applyWind">apply</a>
+</span>	
+<span id="range" class="lOffset">
+	Ranges on: <input type="text" id="ringMark"> <a href="#" id="applyRings">apply</a>	
 </span>
 <a id="toggleGhosts" class="lOffset" href="#">Hide ghosts</a>
 </span>
@@ -68,6 +71,7 @@ var gmKeys= {
 
 <script src="LatLonGraticules.js" type="text/javascript"></script>
 <script src="BdccArrowedPolyline.js" type="text/javascript"></script>
+<script src="BdccRangeRings.js" type="text/javascript"></script>
 
 <script src="kycMarks.js" type="text/javascript"></script>
 
@@ -243,6 +247,14 @@ $(function() {
 		$("#windMark").val("");
 		return false;
 	});
+	
+	$("#applyRings").click( function(){
+		// addRings();
+		var mrk= $("#ringMark").val();
+		addRings( findMarkIndexFromLabel( mrk ));
+		$("#ringMark").val("");
+		return false;
+	});	
 
 });
 
@@ -447,6 +459,28 @@ function addWind( iMarker, bearing, plength) {
 		$gmap.addOverlay( poly1 );	
 		$gmap.gMarkers[ iMarker ].poly.push( poly1 );
 	};
+
+function addRings( iMarker ) {
+			var RC= $gmap.gMarkers[ iMarker ].getLatLng(), d = [];
+			d.push(463); // quarter
+			d.push(926);
+			d.push(1389);
+			d.push(1852);			
+			var l = [];
+			l.push("0.25");
+			l.push("0.5");
+			l.push("0.75");			
+			l.push("1.0");			
+			var c = [];
+			c.push("#0000FF");
+			c.push("#0000FF");
+			c.push("#0000FF");
+			c.push("#0000FF");
+			rings = new BdccRangeRings(RC, c, 1, 0.4, d, null, l);
+            	$gmap.addOverlay(rings);
+			}
+
+
 
 function removeWind( iMarker ) {
 	var markers= $gmap.gMarkers;
