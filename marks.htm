@@ -22,13 +22,13 @@
 </head>
 <body>
 <div id="version">
-Version: <strong>2010-04-24 14:20</strong> 
+Version: <strong>2010-04-27 23:20</strong>
 </div>
 
 <h3>KYC Marks</h3>
 
-<span>Mouse Lat/Lon: <input id="mouse" type="text"> 
-<a id="toggleGrids" class="lOffset" href="#">Grid (Dec)</a> 
+<span>Mouse Lat/Lon: <input id="mouse" type="text">
+<a id="toggleGrids" class="lOffset" href="#">Grid (Dec)</a>
 <span class="lOffset">Bearings: <span id="bearing">True</span> <a id="toggleBearings"  href="#">switch</a></span>
 <a id="addRC" class="lOffset" href="#">Add RC</a>
 <a id="addMark" class="lOffset" href="#">Add Mark</a>
@@ -61,13 +61,13 @@ var gmKeys= {
 		"k7waterfrontorg" : "ABQIAAAA1p3H4HjgFRGggryYDUwteBR-GVf7FupmKPSRacfkHsUAYJ32hxQkhp8NHbvWfAqlbX-s46HBiGLxpQ",
 		"k7waterfrontcom" : "ABQIAAAA9UjYEZNshce6n1Gi1oDOZRQvrUIvRiY5z4Dot4oYMy9uZJYfGhSveungqDjj2yffNXVThDc_wbPzGA",
 		"k7waterfrontca"  : "ABQIAAAA9UjYEZNshce6n1Gi1oDOZRQtlChVTc9c46L-tXnUNcQRfaZ7YBRdIcqdc_UNdJwJRglpIdE0KKCLZg",
-		}, 
+		},
 	gmKey= "ABQIAAAA1p3H4HjgFRGggryYDUwteBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxRKJ9lPafzRFCzaRsPQSUSKAe2tww";
 */	
 </script>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1p3H4HjgFRGggryYDUwteBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxRKJ9lPafzRFCzaRsPQSUSKAe2tww" type="text/javascript"></script>
-<script src="jquery.gmaps.js" type="text/javascript"></script>
+<script src="jquery.gmap.js" type="text/javascript"></script>
 
 <script src="LatLonGraticules.js" type="text/javascript"></script>
 <script src="BdccArrowedPolyline.js" type="text/javascript"></script>
@@ -88,12 +88,12 @@ $.fn.gMap.addToMarkerCollection = function( marker, map ) {
 	map.gMarkers.sort( markerSort );
 };
 
-var kycDefaults = { 
+var kycDefaults = {
 	scrollwheel: false,		
 	zoom: 13,
 	latitude: 44.2044,
 	longitude: -76.4949,
-	draggable: false 
+	draggable: false
 };
 
 
@@ -110,31 +110,31 @@ function loadMap( kycMarks ) {
   }
   if ( newMarks.length ) {
   	$("#addMark").show();
-  }  
-  
+  }
+
 	$gmap.userBearing = function( degrees ) {
 		var deg= (+degrees);
-		if (this.bearings.toLowerCase()=== "magnetic") {  
-			var declination= this.declination || 0; 
+		if (this.bearings.toLowerCase()=== "magnetic") {
+			var declination= this.declination || 0;
 			if (declination===0 ) { return deg; }
 			deg= deg + declination;
-			if ( deg === 360 ) { 
-				deg= 0; 
+			if ( deg === 360 ) {
+				deg= 0;
 			}
-			if ( deg > 360 ) { 
-				deg= deg-360; 
+			if ( deg > 360 ) {
+				deg= deg-360;
 			}
-			if ( deg < 0 ) { 
-				deg= deg+360; 
+			if ( deg < 0 ) {
+				deg= deg+360;
 			}
 		}
-		return deg; 
+		return deg;
 	}
 	
 	////Mouse pointer movement updates the LL indicator
 	GEvent.addListener($gmap, "mousemove", function(point) {
 		document.getElementById("mouse").value= point.toUrlValue();
-	}); 
+	});
 
 	
 	var markers= $gmap.gMarkers;
@@ -142,7 +142,7 @@ function loadMap( kycMarks ) {
 	$( document ).bind( "markerChange", dragEnd )
 	
 	displayMarksLL();
-	  
+	
 } ;
 
 $(function() {
@@ -158,35 +158,35 @@ $(function() {
 	
 	// Flop grids
 	$("#toggleGrids").toggle(
-		function() { 
-			$(this).html("Grid (deg)");  
+		function() {
+			$(this).html("Grid (deg)");
 			if( $gmap.grat ) { $gmap.removeOverlay( $gmap.grat ); }	
 			$gmap.grat = new LatLonGraticule();			
 			$gmap.addOverlay( $gmap.grat );					
 		},
-		function() { 
-			$(this).html("No grid");  
+		function() {
+			$(this).html("No grid");
 			if( $gmap.grat ) { $gmap.removeOverlay( $gmap.grat ); }			
 			$gmap.grat = new LatLonGraticule(true);
 			$gmap.addOverlay( $gmap.grat );					
 		},
-		function() { 
-			$(this).html("Grid (dec)"); 
-			if( $gmap.grat ) { 
-				$gmap.removeOverlay( $gmap.grat ); 
+		function() {
+			$(this).html("Grid (dec)");
+			if( $gmap.grat ) {
+				$gmap.removeOverlay( $gmap.grat );
 				$gmap.grat= {};
-			} 
+			}
 		}		
 	);	
 	
 	// Flop bearings
 	$("#toggleBearings").toggle(
-		function() { 
+		function() {
 			$("#bearing").html("Mag");
 			$gmap.bearings= "magnetic";
 			displayMarksLL();
 		},
-		function() { 
+		function() {
 			$("#bearing").html("True");
 			$gmap.bearings= "true";			
 			displayMarksLL();
@@ -292,13 +292,13 @@ function displayMarksLL() {
 		}
 		
 		if ( marker.originalConfig.ghost ) { continue; }
-		lat= parseInt( marker.getLatLng().y * 1000, 10 )/ 1000;
-		lng= parseInt( marker.getLatLng().x * 1000, 10 )/ 1000;
-		out.push( marker.originalConfig.html.substr( 0, 1 )+ " " + pad( lat.toString(), 7, "0") + "  "+  pad( lng.toString(), 8, "0") );
+		lat= parseInt( marker.getLatLng().y * 100000, 10 )/ 100000;
+		lng= parseInt( marker.getLatLng().x * 100000, 10 )/ 100000;
+		out.push( marker.originalConfig.html.substr( 0, 1 )+ " " + pad( lat.toString(), 8, "0") + "  "+  pad( lng.toString(), 9, "0") );
 	}
 	$("#markData").html( out.join("<br>") );
 
-	// Step 2: 
+	// Step 2:
 	// Range and bearings
 	var d, html="", brgLbl= $gmap.bearings==="true" ? "T" : "m";
     for ( var i = 0; i < markers.length; i++ ) {
@@ -327,17 +327,17 @@ function displayMarksLL() {
 *  http://www.webtoolkit.info/
 *
 **/
- 
+
 var STR_PAD_LEFT = 1;
 var STR_PAD_RIGHT = 2;
 var STR_PAD_BOTH = 3;
 
 function pad(str, len, pad, dir) {
- 
+
 	if (typeof(len) == "undefined") { var len = 0; }
 	if (typeof(pad) == "undefined") { var pad = ' '; }
 	if (typeof(dir) == "undefined") { var dir = STR_PAD_RIGHT; }
- 
+
 	if (len + 1 >= str.length) {
 		switch (dir){
 			case STR_PAD_LEFT:
@@ -387,7 +387,7 @@ function markerSort( a , b ) {
 };
 
 
-function markerData(  ) { 
+function markerData(  ) {
 	var marks= $gmap.gMarkers, len= marks.length, retData=[], packageData=[];
 	
 	// first, the existing pins on the map
@@ -414,7 +414,7 @@ function markerData(  ) {
 	
 };
 
-function markerSerialize( marker ) { 
+function markerSerialize( marker ) {
 	var out=[];
 	if (  marker.getLatLng ) {
 		var ll= marker.getLatLng();
@@ -453,7 +453,7 @@ function addWind( iMarker, bearing, plength) {
 		return removeWind( iMarker );
 	}
 	length = ( plength || 2 ) * 1852;  // meters per Nm
-	var RC= $gmap.gMarkers[ iMarker ].getLatLng(), 
+	var RC= $gmap.gMarkers[ iMarker ].getLatLng(),
 		ff= Course(RC, length, bearing- ( $gmap.bearings=== "magnetic" ? $gmap.declination : 0 ) ),
 		poly1= new BDCCArrowedPolyline( [ff, RC],"#FF0000",4,0.3,null,30,7,"#0000FF",2,0.5);
 		$gmap.addOverlay( poly1 );	
